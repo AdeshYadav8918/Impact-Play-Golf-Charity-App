@@ -1,5 +1,8 @@
+"use client";
 import { useEffect, useState } from 'react';
-import { supabase } from '../../utils/supabase';
+import Image from 'next/image';
+import { supabase } from '@/utils/supabase';
+import styles from './page.module.css';
 
 export default function DrawsPage() {
   const [draws, setDraws] = useState([]);
