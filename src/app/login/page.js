@@ -90,14 +90,21 @@ export default function Login() {
     }
 
     if (authError) {
-      setError(authError.message + " (Please ensure 'Enable Email Confirmations' is disabled in Supabase Auth Provider settings)");
+      setError(authError.message + " (Please ensure 'Email Confirmations' are disabled in Supabase)");
       setLoading(false);
     } else {
-      // Smart Redirect for Demo Login
-      if (creds.sub_status === 'admin') {
-        router.push('/admin');
+      // 4. ROLE-BASED REDIRECTION (The Fix)
+      // We fetch the profile one last time to be absolute
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_status')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profile?.subscription_status === 'admin') {
+        window.location.href = '/admin'; // Force hard reload to reset UI state
       } else {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }
     }
   };
