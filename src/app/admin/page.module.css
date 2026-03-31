@@ -1,0 +1,235 @@
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: calc(100vh - 60px);
+}
+
+.sidebar {
+  background: var(--bg-white);
+  border-right: 1px solid #e2e8f0;
+  padding: 2rem 1rem;
+  position: sticky;
+  top: 60px;
+  height: calc(100vh - 60px);
+}
+
+.sidebarHeader h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  padding: 0 0.75rem;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebarLink {
+  text-align: left;
+  padding: 0.7rem 1rem;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+.sidebarLink:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.sidebarActive {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.content {
+  padding: 2.5rem;
+}
+
+.pageTitle {
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+/* Stats */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: var(--bg-white);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+/* Panels */
+.panel {
+  background: var(--bg-white);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Activity */
+.activityList {
+  margin-top: 1rem;
+}
+
+.activityItem {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+/* Tables */
+.tableWrapper {
+  background: var(--bg-white);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: var(--bg-primary);
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700;
+}
+
+.table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: var(--text-secondary);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: rgba(0,0,0,0.01);
+}
+
+/* Draw Result */
+.drawResultBox {
+  margin-top: 1.5rem;
+  padding: 2rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--accent-green);
+}
+
+.drawnBalls {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.ball {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a5f, #4a7fb5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.25);
+}
+
+.matchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.adminHeader {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.pexels.com/photos/33478/pexels-photo-33478.jpeg?auto=compress&cs=tinysrgb&w=1200');
+  background-size: cover;
+  background-position: center;
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.adminHeader h1 {
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.adminHeader p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .sidebarNav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .statGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .content {
+    padding: 1.5rem;
+  }
+}

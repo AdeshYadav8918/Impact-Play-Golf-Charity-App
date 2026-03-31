@@ -1,0 +1,134 @@
+.charityHero {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.pexels.com/photos/209982/pexels-photo-209982.jpeg?auto=compress&cs=tinysrgb&w=1600');
+  background-size: cover;
+  background-position: center;
+  padding: 8rem 2rem 6rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-white);
+  border: 1px solid #ddd5cb;
+  border-radius: var(--radius-full);
+  padding: 0.25rem;
+}
+
+.filterBtn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  transition: all var(--transition-fast);
+}
+
+.filterActive {
+  background: var(--text-primary);
+  color: white;
+}
+
+.charityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ===== Background Image Cards ===== */
+.charityCard {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.charityCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+}
+
+.charityOverlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.65) 60%, rgba(0,0,0,0.1) 100%);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+.charityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.charityHeader h3 {
+  color: white;
+  font-size: 1.15rem;
+}
+
+.charityDesc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+}
+
+.charityFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.raisedLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.raisedAmount {
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #7dd87d;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filterGroup {
+    overflow-x: auto;
+    width: 100%;
+  }
+  .charityGrid {
+    grid-template-columns: 1fr;
+  }
+}

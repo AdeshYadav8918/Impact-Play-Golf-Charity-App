@@ -1,0 +1,200 @@
+.drawHero {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 8rem 2rem 6rem;
+  position: relative;
+}
+
+.nextDraw {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-full);
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.nextLabel {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+}
+
+.nextDate {
+  color: white;
+  font-weight: 700;
+}
+
+.currentPool {
+  text-align: center;
+}
+
+.poolAmount {
+  font-size: 4rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.mechanicsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ===== Background Image Mechanics Cards ===== */
+.mechCard {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.mechCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+}
+
+.mechOverlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.1) 100%);
+  padding: 1.5rem;
+  text-align: center;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.mechOverlay h3 {
+  color: white;
+}
+
+.mechOverlay p {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.9rem;
+}
+
+.mechIcon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.mechPercent {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #7dd87d;
+  margin: 0.5rem 0;
+}
+
+.drawTabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+  padding: 0.25rem;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.drawTab {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+}
+
+.drawTabActive {
+  background: var(--text-primary);
+  color: white;
+}
+
+.drawResult {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.balls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.ball {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2c3e2d, #5a7d5b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+}
+
+.resultStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.resultStat {
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.resultStatValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.resultStatLabel {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .mechanicsGrid {
+    grid-template-columns: 1fr;
+  }
+  .resultStats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .balls {
+    gap: 0.5rem;
+  }
+  .ball {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+}

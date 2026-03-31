@@ -1,0 +1,109 @@
+.footer {
+  margin-top: auto;
+}
+
+.ctaBanner {
+  background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.pexels.com/photos/8454632/pexels-photo-8454632.jpeg?auto=compress&cs=tinysrgb&w=1600');
+  background-size: cover;
+  background-position: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaBanner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 40%;
+  height: 200%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2rem;
+  background: white;
+  color: var(--text-primary);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ctaBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.footerContent {
+  padding: var(--spacing-xl) 0 var(--spacing-lg);
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.footerLogo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: var(--spacing-md);
+}
+
+.footerDesc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.footerHeading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.footerLink {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  padding: 0.3rem 0;
+  transition: color var(--transition-fast);
+  cursor: pointer;
+}
+.footerLink:hover {
+  color: var(--text-primary);
+}
+
+.footerBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid #ddd5cb;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .footerGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+  }
+  .footerBottom {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}

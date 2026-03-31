@@ -1,0 +1,123 @@
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(44, 62, 45, 0.96); /* Fairway green */
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: white;
+  text-transform: uppercase;
+}
+
+.logoAccent {
+  color: var(--accent-gold);
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.link {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: color var(--transition-fast);
+}
+
+.link:hover {
+  color: white;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mobileToggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+/* Mobile Menu */
+.mobileMenu {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  z-index: 200;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.mobileMenu.open {
+  display: flex;
+}
+
+.mobileMenuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.mobileClose {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.mobileLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobileLink {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+}
+
+.mobileLink:hover {
+  background: var(--bg-white);
+}
+
+@media (max-width: 768px) {
+  .links {
+    display: none;
+  }
+  .actions {
+    display: none;
+  }
+  .mobileToggle {
+    display: block;
+  }
+}
