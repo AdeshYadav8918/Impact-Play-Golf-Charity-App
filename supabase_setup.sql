@@ -13,7 +13,7 @@ create table if not exists public.profiles (
   subscription_status text default 'none', -- none, active, lapsed, admin
   charity_name text,
   contribution_percentage integer default 10,
-  winnings_total numeric default 0,
+  winnings_total numeric default 0.00,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -62,43 +62,60 @@ create table if not exists public.charities (
   name text not null,
   description text,
   image_url text,
-  total_raised numeric default 0,
+  total_raised numeric default 0.00,
   subscriber_count integer default 0,
   featured boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 alter table public.charities enable row level security;
-create policy "Charities are viewable by everyone." on charities for select using (true);
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'Charities are viewable by everyone.' and tablename = 'charities') then
+    create policy "Charities are viewable by everyone." on charities for select using (true);
+  end if;
+end $$;
 
 -- 4. Create Draw Results History (Section 06 & 07)
 create table if not exists public.draws (
   id uuid default uuid_generate_v4() primary key,
   draw_date date not null default current_date,
   winning_numbers integer[] not null, -- Array of 5 numbers
-  prize_pool numeric default 0,
+  prize_pool numeric default 0.00,
+  match_5_count integer default 0,
+  match_4_count integer default 0,
+  match_3_count integer default 0,
   status text default 'simulated', -- simulated, published
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 alter table public.draws enable row level security;
-create policy "Draw history viewable by everyone." on draws for select using (true);
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'Draw history viewable by everyone.' and tablename = 'draws') then
+    create policy "Draw history viewable by everyone." on draws for select using (true);
+  end if;
+end $$;
 
 -- 5. Create Winnings & Payouts (Section 07 & 09)
 create table if not exists public.winnings (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references public.profiles on delete cascade not null,
   draw_id uuid references public.draws on delete cascade,
-  amount numeric not null,
+  amount numeric not null default 0.00,
   match_count integer not null, -- 3, 4, or 5
   status text default 'pending', -- pending, verified, paid
-  proof_url text, -- Storage path to screenshot
+  proof_url text, 
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 alter table public.winnings enable row level security;
-create policy "Users can view own winnings." on winnings for select using (auth.uid() = user_id);
-create policy "Users can upload proof for winnings." on winnings for update using (auth.uid() = user_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'Users can view own winnings.' and tablename = 'winnings') then
+    create policy "Users can view own winnings." on winnings for select using (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Users can upload proof for winnings.' and tablename = 'winnings') then
+    create policy "Users can upload proof for winnings." on winnings for update using (auth.uid() = user_id);
+  end if;
+end $$;
 
 -- 6. Seed Initial Data (Charities)
 insert into public.charities (name, description, image_url, total_raised, subscriber_count, featured)
@@ -107,3 +124,19 @@ values
 ('Youth Sports Fund', 'Providing golf equipment to underprivileged kids.', 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg', 8400, 310, false),
 ('Clean Water Access', 'Supporting water preservation projects globally.', 'https://images.pexels.com/photos/416528/pexels-photo-416528.jpeg', 24100, 580, false)
 on conflict do nothing;
+
+-- 7. AUTO-PROFILE TRIGGER (THE FIX)
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, full_name, subscription_status)
+  values (new.id, new.raw_user_meta_data->>'full_name', 'active');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- Trigger the function every time a user is created in Auth
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();

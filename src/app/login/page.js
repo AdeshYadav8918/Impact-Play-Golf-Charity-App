@@ -26,7 +26,18 @@ export default function Login() {
       setError(authError.message);
       setLoading(false);
     } else {
-      router.push('/');
+      // PRD Section 03: Smart Redirect based on role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_status')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profile?.subscription_status === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
   };
 
@@ -43,23 +54,36 @@ export default function Login() {
       email: creds.email, password: creds.password
     });
 
-    // 2. If error, assume demo user doesn't exist yet and CREATE them dynamically (Live Seeding)
+    // 2. Ensure Profile exists with the CORRECT role (The Fix)
+    if (!authError && data?.user) {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: data.user.id,
+        full_name: creds.full_name,
+        subscription_status: creds.sub_status,
+        charity_name: 'ImpactPlay Default Charity',
+        contribution_percentage: 15
+      });
+
+      if (profileError) {
+        console.error("Profile sync error:", profileError.message);
+      }
+    }
+
+    // 3. Fallback Sign Up (if user doesn't exist)
     if (authError && authError.message.includes('Invalid login credentials')) {
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: creds.email, password: creds.password
       });
 
       if (!signUpError && signUpData?.user) {
-        // Build profile for them
         await supabase.from('profiles').insert([{
           id: signUpData.user.id,
           full_name: creds.full_name,
           subscription_status: creds.sub_status,
-          charity_name: 'Default Auth Charity',
+          charity_name: 'ImpactPlay Default Charity',
           contribution_percentage: 15
         }]);
 
-        // Retry Login
         const retry = await supabase.auth.signInWithPassword({ email: creds.email, password: creds.password });
         data = retry.data; authError = retry.error;
       }
@@ -69,8 +93,12 @@ export default function Login() {
       setError(authError.message + " (Please ensure 'Enable Email Confirmations' is disabled in Supabase Auth Provider settings)");
       setLoading(false);
     } else {
-      // Show landing page after login as requested
-      router.push('/');
+      // Smart Redirect for Demo Login
+      if (creds.sub_status === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
   };
 

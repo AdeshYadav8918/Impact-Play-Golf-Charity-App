@@ -125,16 +125,16 @@ export default function DrawsPage() {
 
               <div className={styles.resultStats}>
                 <div className={styles.resultStat}>
-                  <div className={styles.resultStatValue}>0</div>
+                  <div className={styles.resultStatValue}>{draws[selectedDraw].match_5_count || 0}</div>
                   <div className={styles.resultStatLabel}>5-Match Winners</div>
                   {draws[selectedDraw].status === 'published' && <span className="badge">Verified</span>}
                 </div>
                 <div className={styles.resultStat}>
-                  <div className={styles.resultStatValue}>8</div>
+                  <div className={styles.resultStatValue}>{draws[selectedDraw].match_4_count || 0}</div>
                   <div className={styles.resultStatLabel}>4-Match Winners</div>
                 </div>
                 <div className={styles.resultStat}>
-                  <div className={styles.resultStatValue}>112</div>
+                  <div className={styles.resultStatValue}>{draws[selectedDraw].match_3_count || 0}</div>
                   <div className={styles.resultStatLabel}>3-Match Winners</div>
                 </div>
                 <div className={styles.resultStat}>
