@@ -1,28 +1,27 @@
-"use client";
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import styles from './page.module.css';
-
-const CHARITIES = [
-  { id: 1, name: "Green Earth Initiative", focus: "Environment", desc: "Reforesting ecosystems globally through sustainable planting programs and community education.", raised: "$34,200", img: "https://images.pexels.com/photos/209982/pexels-photo-209982.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-  { id: 2, name: "Youth Tech Fund", focus: "Education", desc: "Providing laptops and coding education to underprivileged students worldwide.", raised: "$28,100", img: "https://images.pexels.com/photos/8454632/pexels-photo-8454632.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-  { id: 3, name: "Clean Water Access", focus: "Health", desc: "Building sustainable wells and water purification systems in rural areas across Africa.", raised: "$42,800", img: "https://images.pexels.com/photos/9366508/pexels-photo-9366508.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-  { id: 4, name: "Golf4Good Foundation", focus: "Sports", desc: "Introducing golf to youth communities as a pathway to scholarships and personal development.", raised: "$18,500", img: "https://images.pexels.com/photos/7758348/pexels-photo-7758348.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-  { id: 5, name: "Mental Health First", focus: "Wellness", desc: "Breaking stigma and providing free counselling services to those in need.", raised: "$22,300", img: "https://images.pexels.com/photos/33478/pexels-photo-33478.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-  { id: 6, name: "Ocean Guardians", focus: "Environment", desc: "Protecting marine ecosystems through cleanup drives and sustainable fishing advocacy.", raised: "$15,700", img: "https://images.pexels.com/photos/33904920/pexels-photo-33904920.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-];
+import { useEffect, useState } from 'react';
+import { supabase } from '../../utils/supabase';
 
 const FILTERS = ['All', 'Environment', 'Education', 'Health', 'Sports', 'Wellness'];
 
 export default function CharitiesPage() {
+  const [charities, setCharities] = useState([]);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const filtered = CHARITIES.filter(c => {
-    const matchesFilter = filter === 'All' || c.focus === filter;
+  useEffect(() => {
+    const fetchCharities = async () => {
+      const { data } = await supabase.from('charities').select('*');
+      if (data) setCharities(data);
+      setLoading(false);
+    };
+    fetchCharities();
+  }, []);
+
+  const filtered = charities.filter(c => {
+    // In our DB 'focus' isn't a column name but we'll use name/desc for simplicity or assume matching logic
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
 
   return (
@@ -88,20 +87,20 @@ export default function CharitiesPage() {
               <div
                 key={charity.id}
                 className={styles.charityCard}
-                style={{ backgroundImage: `url(${charity.img})` }}
+                style={{ backgroundImage: `url(${charity.image_url})` }}
               >
                 <div className={styles.charityOverlay}>
                   <div className={styles.charityHeader}>
                     <h3>{charity.name}</h3>
-                    <span className="badge">{charity.focus}</span>
+                    <span className="badge">Partner</span>
                   </div>
-                  <p className={styles.charityDesc}>{charity.desc}</p>
+                  <p className={styles.charityDesc}>{charity.description}</p>
                   <div className={styles.charityFooter}>
                     <div>
                       <span className={styles.raisedLabel}>Total Raised</span>
-                      <span className={styles.raisedAmount}>{charity.raised}</span>
+                      <span className={styles.raisedAmount}>${charity.total_raised?.toLocaleString()}</span>
                     </div>
-                    <Link href="/login" className="btn btn-dark">View Profile</Link>
+                    <Link href="/register" className="btn btn-dark">Select Charity</Link>
                   </div>
                 </div>
               </div>

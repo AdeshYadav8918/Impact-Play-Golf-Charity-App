@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -59,7 +61,7 @@ export default function Navbar() {
           <Link href="/contact" className={styles.link}>Contact</Link>
         </div>
         <div className={styles.actions}>
-          {user ? (
+          {user && pathname !== '/login' && pathname !== '/register' ? (
             <>
               {profile?.subscription_status === 'admin' ? (
                 <Link href="/admin" className="btn btn-outline" style={{ border: '1.5px solid var(--accent-gold)', color: 'var(--accent-gold)' }}>Admin Console</Link>

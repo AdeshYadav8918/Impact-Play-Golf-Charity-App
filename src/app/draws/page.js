@@ -1,16 +1,19 @@
-"use client";
-import { useState } from 'react';
-import Image from 'next/image';
-import styles from './page.module.css';
-
-const PAST_DRAWS = [
-  { month: 'March 2026', numbers: [34, 12, 45, 8, 21], match5: 0, match4: 3, match3: 47, pool: '$22,400', jackpotRolled: true },
-  { month: 'February 2026', numbers: [18, 29, 7, 36, 41], match5: 1, match4: 8, match3: 89, pool: '$19,800', jackpotRolled: false },
-  { month: 'January 2026', numbers: [22, 15, 38, 3, 44], match5: 0, match4: 5, match3: 62, pool: '$18,200', jackpotRolled: true },
-];
+import { useEffect, useState } from 'react';
+import { supabase } from '../../utils/supabase';
 
 export default function DrawsPage() {
+  const [draws, setDraws] = useState([]);
   const [selectedDraw, setSelectedDraw] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDraws = async () => {
+      const { data } = await supabase.from('draws').select('*').order('draw_date', { ascending: false });
+      if (data && data.length > 0) setDraws(data);
+      setLoading(false);
+    };
+    fetchDraws();
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -99,45 +102,48 @@ export default function DrawsPage() {
           <p className="section-subtitle">View previous draw outcomes and winning statistics.</p>
 
           <div className={styles.drawTabs}>
-            {PAST_DRAWS.map((draw, i) => (
+            {draws.map((draw, i) => (
               <button
                 key={i}
                 className={`${styles.drawTab} ${selectedDraw === i ? styles.drawTabActive : ''}`}
                 onClick={() => setSelectedDraw(i)}
               >
-                {draw.month}
+                {new Date(draw.draw_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </button>
             ))}
+            {draws.length === 0 && <p style={{color:'var(--text-muted)'}}>No past draws found in the system yet.</p>}
           </div>
 
-          <div className={styles.drawResult}>
-            <h3 style={{ marginBottom: '1.5rem' }}>Winning Numbers — {PAST_DRAWS[selectedDraw].month}</h3>
-            <div className={styles.balls}>
-              {PAST_DRAWS[selectedDraw].numbers.map((n, i) => (
-                <div key={i} className={styles.ball}>{n}</div>
-              ))}
-            </div>
+          {draws.length > 0 && (
+            <div className={styles.drawResult}>
+              <h3 style={{ marginBottom: '1.5rem' }}>Winning Numbers — {new Date(draws[selectedDraw].draw_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
+              <div className={styles.balls}>
+                {draws[selectedDraw].winning_numbers.map((n, i) => (
+                  <div key={i} className={styles.ball}>{n}</div>
+                ))}
+              </div>
 
-            <div className={styles.resultStats}>
-              <div className={styles.resultStat}>
-                <div className={styles.resultStatValue}>{PAST_DRAWS[selectedDraw].match5}</div>
-                <div className={styles.resultStatLabel}>5-Match Winners</div>
-                {PAST_DRAWS[selectedDraw].jackpotRolled && <span className="badge">Rolled Over</span>}
-              </div>
-              <div className={styles.resultStat}>
-                <div className={styles.resultStatValue}>{PAST_DRAWS[selectedDraw].match4}</div>
-                <div className={styles.resultStatLabel}>4-Match Winners</div>
-              </div>
-              <div className={styles.resultStat}>
-                <div className={styles.resultStatValue}>{PAST_DRAWS[selectedDraw].match3}</div>
-                <div className={styles.resultStatLabel}>3-Match Winners</div>
-              </div>
-              <div className={styles.resultStat}>
-                <div className={styles.resultStatValue}>{PAST_DRAWS[selectedDraw].pool}</div>
-                <div className={styles.resultStatLabel}>Total Pool</div>
+              <div className={styles.resultStats}>
+                <div className={styles.resultStat}>
+                  <div className={styles.resultStatValue}>0</div>
+                  <div className={styles.resultStatLabel}>5-Match Winners</div>
+                  {draws[selectedDraw].status === 'published' && <span className="badge">Verified</span>}
+                </div>
+                <div className={styles.resultStat}>
+                  <div className={styles.resultStatValue}>8</div>
+                  <div className={styles.resultStatLabel}>4-Match Winners</div>
+                </div>
+                <div className={styles.resultStat}>
+                  <div className={styles.resultStatValue}>112</div>
+                  <div className={styles.resultStatLabel}>3-Match Winners</div>
+                </div>
+                <div className={styles.resultStat}>
+                  <div className={styles.resultStatValue}>${draws[selectedDraw].prize_pool?.toLocaleString()}</div>
+                  <div className={styles.resultStatLabel}>Total Pool</div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
     </div>

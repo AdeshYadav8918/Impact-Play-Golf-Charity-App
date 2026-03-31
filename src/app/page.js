@@ -1,16 +1,17 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../utils/supabase";
 import styles from "./page.module.css";
 
 const IMAGES = {
   hero: 'https://img.freepik.com/free-photo/person-aiming-golf-flag_23-2149305774.jpg?w=1480',
   golfer: 'https://img.freepik.com/free-photo/professional-golf-player_654080-2040.jpg?w=1480',
-  friends: 'https://img.freepik.com/free-photo/professional-golf-player_654080-2041.jpg?w=1480', // Used the new golf ground image here
+  friends: 'https://img.freepik.com/free-photo/professional-golf-player_654080-2041.jpg?w=1480',
   couple: 'https://img.freepik.com/free-photo/beautiful-couple-playing-golf-golf-course_1157-23213.jpg?w=1480',
   volunteers: 'https://img.freepik.com/free-photo/two-volunteers-expressing-unity-support_1262-21089.jpg?w=1480',
-  course: 'https://img.freepik.com/free-photo/professional-golf-player_654080-2041.jpg?w=1480', // Updated URL based on the user's latest link (approximating 30860600 based on previous pattern) although we don't strictly use `course` in the UI right now anyway, I'll update the `friends` image which IS used to give a more golf course vibe.
+  course: 'https://img.freepik.com/free-photo/professional-golf-player_654080-2041.jpg?w=1480',
 };
 
 const STEPS = [
@@ -82,9 +83,23 @@ const FAQ_ITEMS = [
 ];
 
 export default function Home() {
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [openFaq, setOpenFaq] = useState(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setSession(session);
+        const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        if (data) setProfile(data);
+      }
+    };
+    checkUser();
+  }, []);
 
   return (
     <div>
@@ -110,8 +125,20 @@ export default function Home() {
             A subscription platform where your golf scores power monthly prize draws and fund charities you care about. No luck needed — just your game.
           </p>
           <div className={`animate-in delay-3 ${styles.heroCta}`}>
-            <Link href="/register" className="btn btn-dark btn-lg">Subscribe & Play →</Link>
-            <Link href="#how-it-works" className="btn btn-white btn-lg">See how it works</Link>
+            {session ? (
+              <>
+                {profile?.subscription_status === 'admin' ? (
+                  <Link href="/admin" className="btn btn-dark btn-lg">Access Admin Console →</Link>
+                ) : (
+                  <Link href="/dashboard" className="btn btn-dark btn-lg">Go to My Dashboard →</Link>
+                )}
+              </>
+            ) : (
+              <>
+                <Link href="/register" className="btn btn-dark btn-lg">Subscribe & Play →</Link>
+                <Link href="#how-it-works" className="btn btn-white btn-lg">See how it works</Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -164,67 +191,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ========= HOW IT WORKS — Tabbed (like rocket.new) ========= */}
-      <section 
-        id="how-it-works" 
-        className={`section ${styles.howSection}`}
-        style={{ position: 'relative', overflow: 'hidden' }}
-      >
-        <Image
-          src="https://images.pexels.com/photos/8454632/pexels-photo-8454632.jpeg?auto=compress&cs=tinysrgb&w=1600"
-          alt="How it Works Background"
-          fill
-          style={{ objectFit: 'cover', zIndex: 0 }}
-        />
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0, 0, 0, 0.3)',
-            zIndex: 1
-          }}
-        />
-        
+      {/* ========= HOW IT WORKS ========= */}
+      <section id="how-it-works" className={`section ${styles.howSection}`} style={{ position: 'relative', overflow: 'hidden' }}>
+        <Image src="https://images.pexels.com/photos/8454632/pexels-photo-8454632.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="How it Works Background" fill style={{ objectFit: 'cover', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.3)', zIndex: 1 }} />
         <div className={`container ${styles.howContainer}`} style={{ position: 'relative', zIndex: 2 }}>
           <h2 className="section-title">How ImpactPlay Works</h2>
-          <p className="section-subtitle" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Four simple steps from signup to impact. Here&apos;s what happens behind the scenes.</p>
-
+          <p className="section-subtitle" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Four simple steps from signup to impact.</p>
           <div className={styles.featureShowcase}>
             <div className={styles.featureIntro}>
               <div className={styles.featureNav}>
                 {STEPS.map((step, i) => (
-                  <button
-                    key={step.id}
-                    className={`${styles.featureNavItem} ${activeStep === i ? styles.featureNavActive : ''}`}
-                    onClick={() => setActiveStep(i)}
-                  >
-                    • {step.title}
-                  </button>
+                  <button key={step.id} className={`${styles.featureNavItem} ${activeStep === i ? styles.featureNavActive : ''}`} onClick={() => setActiveStep(i)}>• {step.title}</button>
                 ))}
               </div>
             </div>
-
             <div className={styles.featureDetail}>
               <h3 className={styles.featureHeadline}>{STEPS[activeStep].headline}</h3>
               <p className={styles.featureDesc}>{STEPS[activeStep].desc}</p>
-
               <div className={styles.featureSteps}>
                 <p className={styles.stepsLabel}>WHAT ACTUALLY HAPPENS:</p>
                 {STEPS[activeStep].items.map((item, i) => (
-                  <div key={i} className={styles.stepRow}>
-                    <span className={styles.stepNum}>{activeStep + 1}.{i + 1}</span>
-                    <span>{item}</span>
-                  </div>
+                  <div key={i} className={styles.stepRow}><span className={styles.stepNum}>{activeStep + 1}.{i + 1}</span><span>{item}</span></div>
                 ))}
               </div>
-
-              <div className={styles.featureHighlight}>
-                ✨ {STEPS[activeStep].highlight}
-              </div>
-
-              <Link href="/register" className="btn btn-dark" style={{ marginTop: '1.5rem' }}>
-                Get started now
-              </Link>
+              <div className={styles.featureHighlight}>✨ {STEPS[activeStep].highlight}</div>
+              {!session && <Link href="/register" className="btn btn-dark" style={{ marginTop: '1.5rem' }}>Get started now</Link>}
             </div>
           </div>
         </div>
@@ -234,100 +226,35 @@ export default function Home() {
       <section className={`section ${styles.poolSection}`}>
         <div className="container">
           <h2 className="section-title">Prize Pool Breakdown</h2>
-          <p className="section-subtitle">A fixed portion of every subscription funds the monthly prize pool. Here&apos;s how it&apos;s split.</p>
+          <p className="section-subtitle">A fixed portion of every subscription funds the monthly prize pool.</p>
           <div className={styles.poolGrid}>
-            <div className={`card ${styles.poolCard}`}>
-              <div className={styles.poolTier}>🏆 5-Number Match</div>
-              <div className={styles.poolPercent}>40%</div>
-              <div className={styles.poolMeta}>Jackpot — rolls over if unclaimed</div>
-            </div>
-            <div className={`card ${styles.poolCard}`}>
-              <div className={styles.poolTier}>⭐ 4-Number Match</div>
-              <div className={styles.poolPercent}>35%</div>
-              <div className={styles.poolMeta}>Split equally among winners</div>
-            </div>
-            <div className={`card ${styles.poolCard}`}>
-              <div className={styles.poolTier}>🎯 3-Number Match</div>
-              <div className={styles.poolPercent}>25%</div>
-              <div className={styles.poolMeta}>Split equally among winners</div>
-            </div>
+            <div className={`card ${styles.poolCard}`}><div className={styles.poolTier}>🏆 5-Number Match</div><div className={styles.poolPercent}>40%</div><div className={styles.poolMeta}>Jackpot — rolls over if unclaimed</div></div>
+            <div className={`card ${styles.poolCard}`}><div className={styles.poolTier}>⭐ 4-Number Match</div><div className={styles.poolPercent}>35%</div><div className={styles.poolMeta}>Split equally among winners</div></div>
+            <div className={`card ${styles.poolCard}`}><div className={styles.poolTier}>🎯 3-Number Match</div><div className={styles.poolPercent}>25%</div><div className={styles.poolMeta}>Split equally among winners</div></div>
           </div>
         </div>
       </section>
 
       {/* ========= PRICING ========= */}
-      <section 
-        id="pricing" 
-        className={`section ${styles.pricingSection}`}
-        style={{ position: 'relative', overflow: 'hidden' }}
-      >
-        <Image
-          src="https://images.pexels.com/photos/33904920/pexels-photo-33904920.jpeg?auto=compress&cs=tinysrgb&w=1600"
-          alt="Pricing Background"
-          fill
-          style={{ objectFit: 'cover', zIndex: 0 }}
-        />
-        <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.35)',
-          zIndex: 1
-        }} />
-        
+      <section id="pricing" className={`section ${styles.pricingSection}`} style={{ position: 'relative', overflow: 'hidden' }}>
+        <Image src="https://images.pexels.com/photos/33904920/pexels-photo-33904920.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Pricing Background" fill style={{ objectFit: 'cover', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.35)', zIndex: 1 }} />
         <div className="container" style={{ position: 'relative', zIndex: 2 }}>
           <h2 className="section-title" style={{ color: 'white' }}>Pricing</h2>
-          <p className="section-subtitle" style={{ color: 'rgba(255,255,255,0.7)' }}>
-            Start playing. Upgrade as you go.
-          </p>
-
           <div className={styles.billingToggle}>
-            <button
-              className={`${styles.toggleBtn} ${billingCycle === 'monthly' ? styles.toggleActive : ''}`}
-              onClick={() => setBillingCycle('monthly')}
-            >Monthly</button>
-            <button
-              className={`${styles.toggleBtn} ${billingCycle === 'yearly' ? styles.toggleActive : ''}`}
-              onClick={() => setBillingCycle('yearly')}
-            >Yearly <span className={styles.saveBadge}>Save 20%</span></button>
+            <button className={`${styles.toggleBtn} ${billingCycle === 'monthly' ? styles.toggleActive : ''}`} onClick={() => setBillingCycle('monthly')}>Monthly</button>
+            <button className={`${styles.toggleBtn} ${billingCycle === 'yearly' ? styles.toggleActive : ''}`} onClick={() => setBillingCycle('yearly')}>Yearly <span className={styles.saveBadge}>Save 20%</span></button>
           </div>
-
           <div className={styles.pricingGrid}>
             <div className={styles.pricingCard}>
-              <div className={styles.planHeader}>
-                <span className={styles.planName}>Monthly</span>
-              </div>
-              <div className={styles.planPrice}>
-                {billingCycle === 'monthly' ? '$9.99' : '$7.99'}
-                <span className={styles.planPer}>/month{billingCycle === 'yearly' ? ' billed yearly' : ''}</span>
-              </div>
-              <p className={styles.planDesc}>For casual golfers who want in on the action.</p>
-              <Link href="/register" className="btn btn-dark" style={{ width: '100%' }}>Get Started</Link>
-              <ul className={styles.planFeatures}>
-                <li>✓ Full score tracking</li>
-                <li>✓ Monthly draw entry</li>
-                <li>✓ Charity selection</li>
-                <li>✓ Dashboard access</li>
-                <li>✓ Winner verification</li>
-              </ul>
+              <div className={styles.planHeader}><span className={styles.planName}>Monthly</span></div>
+              <div className={styles.planPrice}>{billingCycle === 'monthly' ? '$9.99' : '$7.99'}<span className={styles.planPer}>/month</span></div>
+              {!session && <Link href="/register" className="btn btn-dark" style={{ width: '100%' }}>Get Started</Link>}
             </div>
             <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
-              <div className={styles.planHeader}>
-                <span className={styles.planName}>Yearly</span>
-                <span className={styles.planBadge}>Best Value</span>
-              </div>
-              <div className={styles.planPrice}>
-                {billingCycle === 'monthly' ? '$99.99' : '$95.88'}
-                <span className={styles.planPer}>/year</span>
-              </div>
-              <p className={styles.planDesc}>For committed players. Save 20% and maximize impact.</p>
-              <Link href="/register" className="btn btn-dark" style={{ width: '100%' }}>Get Started</Link>
-              <ul className={styles.planFeatures}>
-                <li>✓ Everything in Monthly</li>
-                <li>✓ 20% discount on subscription</li>
-                <li>✓ Priority draw notifications</li>
-                <li>✓ Increased charity contribution</li>
-                <li>✓ Early access to new features</li>
-              </ul>
+              <div className={styles.planHeader}><span className={styles.planName}>Yearly</span><span className={styles.planBadge}>Best Value</span></div>
+              <div className={styles.planPrice}>{billingCycle === 'monthly' ? '$99.99' : '$95.88'}<span className={styles.planPer}>/year</span></div>
+              {!session && <Link href="/register" className="btn btn-dark" style={{ width: '100%' }}>Get Started</Link>}
             </div>
           </div>
         </div>
@@ -337,22 +264,14 @@ export default function Home() {
       <section id="faq" className="section">
         <div className="container">
           <h2 className="section-title">FAQs</h2>
-          <p className="section-subtitle">Everything you need to know about ImpactPlay.</p>
           <div className={styles.faqList}>
             {FAQ_ITEMS.map((item, i) => (
               <div key={i} className={styles.faqItem}>
-                <button
-                  className={styles.faqQuestion}
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                >
+                <button className={styles.faqQuestion} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                   <span>{item.q}</span>
                   <span className={styles.faqIcon}>{openFaq === i ? '−' : '+'}</span>
                 </button>
-                {openFaq === i && (
-                  <div className={styles.faqAnswer}>
-                    {item.a}
-                  </div>
-                )}
+                {openFaq === i && <div className={styles.faqAnswer}>{item.a}</div>}
               </div>
             ))}
           </div>

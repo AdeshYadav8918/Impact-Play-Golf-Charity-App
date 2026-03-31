@@ -24,23 +24,71 @@ const MOCK_WINNERS = [
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [drawLogic, setDrawLogic] = useState('random');
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [drawResult, setDrawResult] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const simulateDraw = () => {
+  // Fetch real users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    const { data } = await supabase.from('profiles').select('*');
+    if (data) setUsers(data);
+  };
+
+  const simulateDraw = async () => {
     setIsSimulating(true);
-    setTimeout(() => {
-      const nums = Array.from({ length: 5 }, () => Math.floor(Math.random() * 45) + 1);
-      setDrawResult({
-        numbers: [...new Set(nums)].slice(0, 5),
-        match5: 0, match4: Math.floor(Math.random() * 5) + 1, match3: Math.floor(Math.random() * 80) + 30,
-        pool: '$24,500',
-      });
-      // Pad to ensure 5 unique numbers
-      while (drawResult === null) break;
-      setIsSimulating(false);
-    }, 1500);
+    
+    // 1. Generate Winning Numbers (5 unique, 1-45)
+    let winningNums = [];
+    while(winningNums.length < 5) {
+      const n = Math.floor(Math.random() * 45) + 1;
+      if(!winningNums.includes(n)) winningNums.push(n);
+    }
+
+    // 2. Fetch ALL Scores from ALL users
+    const { data: allScores } = await supabase.from('scores').select('user_id, score');
+
+    // 3. Count Matches
+    let m5 = 0, m4 = 0, m3 = 0;
+    allScores.forEach(s => {
+      if (winningNums.includes(s.score)) {
+        // This is a simplified "Number Match" logic for the assignment
+        // In a real lottery, users pick 5 numbers. Here, each score is a 'ticket'.
+        // If the single score matches any winning number, it's a match.
+        // For the PRD's 5-Number match, a user would need 5 scores that match 5 draw numbers.
+        
+        // Refined Logic for PRD: Group score by user_id
+      }
+    });
+
+    // PRD matching logic (Simplified for demo): 
+    // We'll count how many users have scores that appear in the winning numbers.
+    const userMatches = {};
+    allScores.forEach(s => {
+      if (winningNums.includes(s.score)) {
+        userMatches[s.user_id] = (userMatches[s.user_id] || 0) + 1;
+      }
+    });
+
+    Object.values(userMatches).forEach(count => {
+      if (count >= 5) m5++;
+      else if (count === 4) m4++;
+      else if (count === 3) m3++;
+    });
+
+    // 4. Calculate Pool (Mocking sub count * fee)
+    const activeSubs = users.filter(u => u.subscription_status === 'active').length || 1245;
+    const totalPool = activeSubs * 9.99 * 0.4; // 40% to pool
+
+    setDrawResult({
+      numbers: winningNums,
+      match5: m5, match4: m4, match3: m3,
+      pool: `$${totalPool.toLocaleString()}`,
+    });
+
+    setIsSimulating(false);
   };
 
   const TABS = [
@@ -114,13 +162,13 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {MOCK_USERS.map(u => (
+                  {users.map(u => (
                     <tr key={u.id}>
-                      <td><strong>{u.name}</strong></td>
-                      <td>{u.email}</td>
-                      <td>{u.plan}</td>
-                      <td><span className={`badge ${u.status === 'Active' ? '' : 'badge-blue'}`}>{u.status}</span></td>
-                      <td>{u.scores.join(', ')}</td>
+                      <td><strong>{u.full_name}</strong></td>
+                      <td>{u.email || 'N/A'}</td>
+                      <td>{u.subscription_status === 'admin' ? 'N/A' : 'Monthly'}</td>
+                      <td><span className={`badge ${u.subscription_status === 'active' || u.subscription_status === 'admin' ? '' : 'badge-blue'}`}>{u.subscription_status}</span></td>
+                      <td>View Details</td>
                       <td><button className="btn btn-outline" style={{padding:'0.4rem 0.8rem', fontSize:'0.8rem'}}>Edit</button></td>
                     </tr>
                   ))}

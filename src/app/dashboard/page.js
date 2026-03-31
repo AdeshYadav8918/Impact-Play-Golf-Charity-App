@@ -59,6 +59,21 @@ export default function Dashboard() {
     if (!val || val < 1 || val > 45) return alert("Score must be between 1 and 45 (Stableford format)");
     if (!newDate) return alert("Please select a date for this score.");
 
+    // PRD Section 05: Rolling Logic (Keep only latest 5)
+    // 1. Get current count
+    const { data: currentScores } = await supabase
+      .from('scores')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .order('date_played', { ascending: true });
+
+    if (currentScores && currentScores.length >= 5) {
+      // 2. Delete the oldest one (the first in our ascending list)
+      const oldestId = currentScores[0].id;
+      await supabase.from('scores').delete().eq('id', oldestId);
+    }
+
+    // 3. Insert new score
     const { error } = await supabase.from('scores').insert({
       user_id: session.user.id,
       score: val,
@@ -72,6 +87,13 @@ export default function Dashboard() {
       setNewDate('');
       fetchScores(session.user.id); // Refresh grid
     }
+  };
+
+  const handleUploadProof = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    alert("Simulating Upload: In a production environment, this would upload " + file.name + " to Supabase Storage Bucket 'winner-proofs' and update the winnings entry.");
   };
 
   if (loading) return <div style={{padding:'4rem', textAlign:'center'}}>Loading Dashboard...</div>;
@@ -202,9 +224,12 @@ export default function Dashboard() {
                   <span className={styles.infoValue}>Paid</span>
                 </div>
               </div>
-              <button className="btn btn-dark" style={{ width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
-                Upload Winner Proof
-              </button>
+              <div style={{ marginTop: '1rem' }}>
+                <label className="btn btn-dark" style={{ width: '100%', justifyContent: 'center', cursor: 'pointer' }}>
+                  Upload Winner Proof (PNG/JPG)
+                  <input type="file" hidden onChange={handleUploadProof} accept="image/*" />
+                </label>
+              </div>
             </div>
           </div>
         </div>
