@@ -1,7 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-export async function middleware(request) {
+/**
+ * Next.js 16 'Proxy' Convention
+ * This replaces the deprecated 'middleware.js' file.
+ * Underlying functionality remains identical to middleware.
+ */
+export async function proxy(request) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,

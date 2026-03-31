@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '@/utils/supabase';
 import styles from './page.module.css';
 
 export default function Dashboard() {

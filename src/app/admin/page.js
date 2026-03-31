@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '@/utils/supabase';
 import styles from './page.module.css';
 
 export default function AdminDashboard() {
