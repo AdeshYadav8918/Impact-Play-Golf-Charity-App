@@ -11,6 +11,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [charityPercent, setCharityPercent] = useState(10);
   const [existingUser, setExistingUser] = useState(false);
+  const [billingPlan, setBillingPlan] = useState('monthly'); // Added billing plan
 
   useEffect(() => {
     const checkUser = async () => {
@@ -84,7 +85,8 @@ export default function Register() {
       email,
       password,
       selectedCharity,
-      charityPercent
+      charityPercent,
+      billingPlan
     };
     
     sessionStorage.setItem('pendingRegistration', JSON.stringify(pendingData));
@@ -227,9 +229,14 @@ export default function Register() {
               <h1 className={styles.authTitle}>Subscription</h1>
               <p className={styles.authSubtitle}>Review your player plan and finalize your impact.</p>
 
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                <button type="button" className={`btn ${billingPlan === 'monthly' ? 'btn-dark' : 'btn-outline'}`} style={{ flex: 1 }} onClick={() => setBillingPlan('monthly')}>Monthly ($9.99)</button>
+                <button type="button" className={`btn ${billingPlan === 'yearly' ? 'btn-dark' : 'btn-outline'}`} style={{ flex: 1 }} onClick={() => setBillingPlan('yearly')}>Yearly ($95.88)</button>
+              </div>
+
               <div className={regStyles.reviewBox}>
                 <div className={regStyles.reviewRow}>
-                  <span>Plan</span><strong>Monthly — $9.99/mo</strong>
+                  <span>Plan</span><strong>{billingPlan === 'monthly' ? 'Monthly — $9.99/mo' : 'Yearly — $95.88/yr'}</strong>
                 </div>
                 <div className={regStyles.reviewRow}>
                   <span>Charity</span><strong>{selectedCharity}</strong>

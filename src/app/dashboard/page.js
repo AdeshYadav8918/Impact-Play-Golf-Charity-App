@@ -189,7 +189,12 @@ export default function Dashboard() {
           <div className={styles.sideStack}>
             {/* Subscription */}
             <div className={styles.panel}>
-              <h3>Subscription</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>Subscription</h3>
+                {profile.subscription_status === 'inactive' && (
+                  <Link href="/register" className="btn btn-dark" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Renew</Link>
+                )}
+              </div>
               <div className={styles.infoGrid}>
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Plan</span>
@@ -197,17 +202,37 @@ export default function Dashboard() {
                 </div>
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Status</span>
-                  <span className={styles.infoValue} style={{color: 'var(--accent-green)'}}>Active</span>
+                  <span className={styles.infoValue} style={{color: profile.subscription_status === 'active' ? 'var(--accent-green)' : 'var(--text-muted)'}}>
+                    {profile.subscription_status === 'active' ? 'Active' : 'Inactive'}
+                  </span>
                 </div>
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Renewal</span>
-                  <span className={styles.infoValue}>April 15, 2026</span>
+                  <span className={styles.infoValue}>{profile.subscription_status === 'active' ? 'April 15, 2026' : '—'}</span>
                 </div>
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Amount</span>
                   <span className={styles.infoValue}>$9.99/mo</span>
                 </div>
               </div>
+              {profile.subscription_status === 'active' && (
+                <button 
+                  className="btn btn-outline" 
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', color: '#dc2626', borderColor: 'rgba(239,68,68,0.2)' }}
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to cancel your ImpactPlay subscription? You will lose access to premium features instantly.")) {
+                      const { error } = await supabase.from('profiles').update({ subscription_status: 'inactive' }).eq('id', session.user.id);
+                      if (!error) {
+                        setProfile({ ...profile, subscription_status: 'inactive' });
+                      } else {
+                        alert("Error cancelling subscription.");
+                      }
+                    }
+                  }}
+                >
+                  Cancel Subscription
+                </button>
+              )}
             </div>
 
             {/* Charity */}
