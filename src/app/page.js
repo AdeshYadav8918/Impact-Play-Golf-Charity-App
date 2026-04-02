@@ -82,6 +82,14 @@ const FAQ_ITEMS = [
   { q: 'What happens to the prize pool if nobody wins the jackpot?', a: 'The 5-number match jackpot rolls over to the next month\'s draw, growing the prize until someone wins it. The 3 and 4-match pools do not roll over.' },
 ];
 
+const CHARITIES_LIST = [
+  { name: 'Green Earth Initiative', focus: 'Environment', desc: 'Planting trees and cleaning oceans to combat climate change globally.' },
+  { name: 'Youth Tech Fund', focus: 'Education', desc: 'Providing laptops and coding classes to underprivileged students.' },
+  { name: 'Clean Water Access', focus: 'Global Health', desc: 'Building sustainable water and sanitization systems in developing regions.' },
+  { name: 'Golf4Good Foundation', focus: 'Community Sports', desc: 'Making golf accessible to youth and using the sport for community building.' },
+  { name: 'Mental Health First', focus: 'Wellness', desc: 'Funding free therapy sessions and breaking the stigma around mental health.' }
+];
+
 export default function Home() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -231,6 +239,29 @@ export default function Home() {
             <div className={`card ${styles.poolCard}`}><div className={styles.poolTier}>🏆 5-Number Match</div><div className={styles.poolPercent}>40%</div><div className={styles.poolMeta}>Jackpot — rolls over if unclaimed</div></div>
             <div className={`card ${styles.poolCard}`}><div className={styles.poolTier}>⭐ 4-Number Match</div><div className={styles.poolPercent}>35%</div><div className={styles.poolMeta}>Split equally among winners</div></div>
             <div className={`card ${styles.poolCard}`}><div className={styles.poolTier}>🎯 3-Number Match</div><div className={styles.poolPercent}>25%</div><div className={styles.poolMeta}>Split equally among winners</div></div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========= CHARITIES ROW ========= */}
+      <section id="charities" className="section" style={{ backgroundColor: 'var(--bg-light)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="section-title">Our Charity Partners</h2>
+            <p className="section-subtitle">When you subscribe, you choose exactly where your automated contributions go. Explore the vetted organizations driving real change.</p>
+          </div>
+          <div className={styles.poolGrid} style={{ gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+            {CHARITIES_LIST.map((charity, i) => (
+              <div key={i} className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--accent-green)', letterSpacing: '0.5px' }}>
+                  {charity.focus}
+                </span>
+                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-dark)', margin: 0 }}>{charity.name}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
+                  {charity.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
