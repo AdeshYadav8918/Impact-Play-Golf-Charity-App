@@ -73,7 +73,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link href="/login" className="btn btn-dark">Sign In</Link>
-              <Link href="/register" className="btn btn-dark">Subscribe</Link>
+              <Link href="/register" className="btn btn-dark">Create Account</Link>
             </>
           )}
         </div>
@@ -97,7 +97,7 @@ export default function Navbar() {
           <Link href="/contact" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>Contact</Link>
           <hr style={{border: 'none', borderTop: '1px solid #e2e8f0', margin: '1rem 0'}} />
           <Link href="/login" className="btn btn-dark" style={{justifyContent:'center'}} onClick={() => setMobileOpen(false)}>Sign In</Link>
-          <Link href="/register" className="btn btn-dark" style={{justifyContent:'center'}} onClick={() => setMobileOpen(false)}>Subscribe</Link>
+          <Link href="/register" className="btn btn-dark" style={{justifyContent:'center'}} onClick={() => setMobileOpen(false)}>Create Account</Link>
         </div>
       </div>
     </>

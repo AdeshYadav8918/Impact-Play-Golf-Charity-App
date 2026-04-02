@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
           <div>
             <h4 className={styles.footerHeading}>Account</h4>
-            <Link href="/register" className={styles.footerLink}>Subscribe</Link>
+            <Link href="/register" className={styles.footerLink}>Create Account</Link>
             <Link href="/login" className={styles.footerLink}>Sign In</Link>
             <Link href="/dashboard" className={styles.footerLink}>Dashboard</Link>
           </div>

@@ -133,7 +133,7 @@ export default function Dashboard() {
                 You currently have a free account. To unlock the dashboard, log your scores, track winnings, and participate in our monthly charity draws, you need an active subscription.
               </p>
               <Link href="/register" className="btn btn-dark" style={{ padding: '0.85rem 2rem', fontSize: '1.1rem' }}>
-                Subscribe to ImpactPlay
+                Upgrade Account
               </Link>
             </div>
           )}
