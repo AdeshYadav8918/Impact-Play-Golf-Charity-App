@@ -165,3 +165,23 @@
     flex-direction: column;
   }
 }
+
+.scoreDelete {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.scoreDelete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}

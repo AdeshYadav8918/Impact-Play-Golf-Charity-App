@@ -10,7 +10,9 @@ export default function AdminDashboard() {
   const [verifications, setVerifications] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [lastDraw, setLastDraw] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -26,9 +28,9 @@ export default function AdminDashboard() {
       const { data } = await supabase.from('charities').select('*');
       if (data) setCharities(data);
     }
-    if (activeTab === 'winners') {
-      const { data } = await supabase.from('winnings').select('*, profiles(full_name)');
-      if (data) setVerifications(data);
+    if (activeTab === 'draws' || activeTab === 'overview') {
+      const { data } = await supabase.from('draws').select('*').order('published_at', { ascending: false }).limit(1).single();
+      if (data) setLastDraw(data);
     }
     setLoading(false);
   };
@@ -66,20 +68,92 @@ export default function AdminDashboard() {
       else if (count === 3) m3++;
     });
 
-    const activeSubs = users.filter(u => u.subscription_status === 'active').length || 1;
-    const totalPool = activeSubs * 9.99 * 0.4;
+    const activeSubs = users.filter(u => u.subscription_status === 'active').length || 0;
+    const currentRollover = Number(lastDraw?.rolled_over || 0);
+    const subscriptionPool = activeSubs * 9.99;
+    
+    // PRD Section 07: 40% (match5), 35% (match4), 25% (match3)
+    const m5Pool = (subscriptionPool * 0.4) + currentRollover;
+    const m4Pool = subscriptionPool * 0.35;
+    const m3Pool = subscriptionPool * 0.25;
 
     setDrawResult({
       numbers: winningNums,
       match5: m5, match4: m4, match3: m3,
-      pool: `$${totalPool.toLocaleString()}`,
+      matches: userMatches,
+      validUserIds,
+      totalPool: subscriptionPool + currentRollover,
+      m5Share: m5 > 0 ? m5Pool / m5 : 0,
+      m4Share: m4 > 0 ? m4Pool / m4 : 0,
+      m3Share: m3 > 0 ? m3Pool / m3 : 0,
+      potentialRollover: m5 === 0 ? m5Pool : 0
     });
     setIsSimulating(false);
   };
 
+  const publishDraw = async () => {
+    if (!drawResult) return;
+    setIsPublishing(true);
+
+    try {
+      // 1. Save Draw Results
+      const { data: draw, error: dErr } = await supabase.from('draws').insert([{
+        draw_month: new Date().toISOString().split('T')[0],
+        winning_numbers: drawResult.numbers,
+        total_pool: drawResult.totalPool,
+        rolled_over: drawResult.potentialRollover,
+        match5_winners: drawResult.match5,
+        match4_winners: drawResult.match4,
+        match3_winners: drawResult.match3
+      }]).select().single();
+
+      if (dErr) throw dErr;
+
+      // 2. Create Winnings records for every matcher
+      const winningsToInsert = [];
+      Object.entries(drawResult.matches).forEach(([uid, count]) => {
+        let amount = 0;
+        let type = '';
+        if (count >= 5) { amount = drawResult.m5Share; type = 'match5'; }
+        else if (count === 4) { amount = drawResult.m4Share; type = 'match4'; }
+        else if (count === 3) { amount = drawResult.m3Share; type = 'match3'; }
+
+        if (amount > 0) {
+          winningsToInsert.push({
+            user_id: uid,
+            draw_id: draw.id,
+            amount: amount,
+            match_type: type,
+            status: 'pending'
+          });
+        }
+      });
+
+      if (winningsToInsert.length > 0) {
+        const { error: wErr } = await supabase.from('winnings').insert(winningsToInsert);
+        if (wErr) throw wErr;
+      }
+
+      alert("Draw published successfully! Winners notified and Jackpot updated.");
+      setDrawResult(null);
+      fetchData();
+    } catch (err) {
+      alert("Error publishing draw: " + err.message);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const handleApprove = async (id) => {
-    await supabase.from('winnings').update({ status: 'verified' }).eq('id', id);
+    await supabase.from('winnings').update({ status: 'paid' }).eq('id', id);
     fetchData();
+  };
+
+  const handleReject = async (id) => {
+    if (confirm("Reject this winning submission? The payout will be cancelled.")) {
+      await supabase.from('winnings').update({ status: 'rejected' }).eq('id', id);
+      fetchData();
+    }
   };
 
   const TABS = [
@@ -151,8 +225,14 @@ export default function AdminDashboard() {
               <div className={styles.drawResultBox}>
                 <div className={styles.drawnBalls}>{drawResult.numbers.map((n, i) => <div key={i} className={styles.ball}>{n}</div>)}</div>
                 <div className={styles.matchResults}>
+                  <div><strong>Total Pool (Inc. Rollover):</strong> ${drawResult.totalPool.toFixed(2)}</div>
                   <div><strong>Matches:</strong> 5-way: {drawResult.match5} | 4-way: {drawResult.match4} | 3-way: {drawResult.match3}</div>
-                  <div><strong>Prize Pool Share:</strong> {drawResult.pool}</div>
+                  {drawResult.match5 === 0 && <div style={{color: 'var(--accent-gold)'}}><strong>Rollover Generated:</strong> ${drawResult.potentialRollover.toFixed(2)}</div>}
+                </div>
+                <div style={{marginTop: '1.5rem'}}>
+                  <button className="btn btn-green" onClick={publishDraw} disabled={isPublishing}>
+                    {isPublishing ? 'Publishing...' : 'Confirm & Publish Official Results'}
+                  </button>
                 </div>
               </div>
             )}
@@ -176,17 +256,25 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {activeTab === 'winners' && (
+         {activeTab === 'winners' && (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
-              <thead><tr><th>Player</th><th>Status</th><th>Match</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Player</th><th>Matches</th><th>Prize</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 {verifications.map(v => (
                   <tr key={v.id}>
                     <td><strong>{v.profiles?.full_name}</strong></td>
-                    <td><span className="badge">{v.status}</span></td>
-                    <td>{v.match_count}-Number</td>
-                    <td>{v.status === 'pending' && <button className="btn btn-green" onClick={() => handleApprove(v.id)}>Approve</button>}</td>
+                    <td>{v.match_type}</td>
+                    <td>${Number(v.amount).toFixed(2)}</td>
+                    <td><span className={`badge ${v.status === 'paid' ? 'badge-green' : v.status === 'rejected' ? 'badge-red' : ''}`}>{v.status}</span></td>
+                    <td>
+                      {v.status === 'pending' && (
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className="btn btn-green" style={{ padding: '4px 12px', fontSize: '0.85rem' }} onClick={() => handleApprove(v.id)}>Pay</button>
+                          <button className="btn btn-outline" style={{ padding: '4px 12px', fontSize: '0.85rem', color: '#dc2626' }} onClick={() => handleReject(v.id)}>Reject</button>
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
