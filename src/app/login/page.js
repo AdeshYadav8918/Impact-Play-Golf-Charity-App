@@ -41,73 +41,7 @@ export default function Login() {
     }
   };
 
-  const handleDemoLogin = async (role) => {
-    setLoading(true);
-    setError('');
 
-    const creds = role === 'admin'
-      ? { email: 'admin@impactplay.com', password: 'password123', full_name: 'Admin Coordinator', sub_status: 'admin' }
-      : { email: 'user@impactplay.com', password: 'password123', full_name: 'Demo Golfer', sub_status: 'active' };
-
-    // 1. Attempt Sign In
-    let { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: creds.email, password: creds.password
-    });
-
-    // 2. Ensure Profile exists with the CORRECT role (The Fix)
-    if (!authError && data?.user) {
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: data.user.id,
-        full_name: creds.full_name,
-        subscription_status: creds.sub_status,
-        charity_name: 'ImpactPlay Default Charity',
-        contribution_percentage: 15
-      });
-
-      if (profileError) {
-        console.error("Profile sync error:", profileError.message);
-      }
-    }
-
-    // 3. Fallback Sign Up (if user doesn't exist)
-    if (authError && authError.message.includes('Invalid login credentials')) {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: creds.email, password: creds.password
-      });
-
-      if (!signUpError && signUpData?.user) {
-        await supabase.from('profiles').insert([{
-          id: signUpData.user.id,
-          full_name: creds.full_name,
-          subscription_status: creds.sub_status,
-          charity_name: 'ImpactPlay Default Charity',
-          contribution_percentage: 15
-        }]);
-
-        const retry = await supabase.auth.signInWithPassword({ email: creds.email, password: creds.password });
-        data = retry.data; authError = retry.error;
-      }
-    }
-
-    if (authError) {
-      setError(authError.message + " (Please ensure 'Email Confirmations' are disabled in Supabase)");
-      setLoading(false);
-    } else {
-      // 4. ROLE-BASED REDIRECTION (The Fix)
-      // We fetch the profile one last time to be absolute
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('subscription_status')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profile?.subscription_status === 'admin') {
-        window.location.href = '/admin'; // Force hard reload to reset UI state
-      } else {
-        window.location.href = '/dashboard';
-      }
-    }
-  };
 
   return (
     <div className={styles.authSplit}>
@@ -162,16 +96,6 @@ export default function Login() {
             </button>
           </form>
 
-          <div className={styles.authDivider}><span>Professional Demo Access</span></div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-            <button onClick={() => handleDemoLogin('user')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
-              Sign in as Player
-            </button>
-            <button onClick={() => handleDemoLogin('admin')} className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
-              Sign in as Admin
-            </button>
-          </div>
 
           <p className={styles.authSwitch}>
             Don&apos;t have an account? <Link href="/register" className={styles.authLink}>Subscribe here</Link>

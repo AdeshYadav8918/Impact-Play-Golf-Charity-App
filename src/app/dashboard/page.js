@@ -111,7 +111,33 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className={styles.grid}>
+        <div className={styles.grid} style={{ position: 'relative' }}>
+          
+          {profile.subscription_status === 'inactive' && (
+            <div style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '2rem',
+              borderRadius: 'var(--radius-lg)'
+            }}>
+              <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--text-dark)' }}>Premium Features Locked</h2>
+              <p style={{ maxWidth: '450px', marginBottom: '2rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                You currently have a free account. To unlock the dashboard, log your scores, track winnings, and participate in our monthly charity draws, you need an active subscription.
+              </p>
+              <Link href="/register" className="btn btn-dark" style={{ padding: '0.85rem 2rem', fontSize: '1.1rem' }}>
+                Subscribe to ImpactPlay
+              </Link>
+            </div>
+          )}
+
           {/* ===== LEFT: Scores ===== */}
           <section className={styles.panel}>
             <div className={styles.panelHeader}>

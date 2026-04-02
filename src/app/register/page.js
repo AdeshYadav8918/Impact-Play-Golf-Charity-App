@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../utils/supabase';
@@ -10,6 +10,18 @@ export default function Register() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [charityPercent, setCharityPercent] = useState(10);
+  const [existingUser, setExistingUser] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setExistingUser(true);
+        setStep(2);
+      }
+    };
+    checkUser();
+  }, []);
   
   // Registration form state
   const [fullName, setFullName] = useState('');
@@ -18,6 +30,44 @@ export default function Register() {
   const [selectedCharity, setSelectedCharity] = useState('Green Earth Initiative');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleFreeAccount = async () => {
+    if (!email || !password || !fullName) {
+      setError("Please fill in all account details.");
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(authError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (authData?.user) {
+      const { error: profileError } = await supabase.from('profiles').insert([{
+        id: authData.user.id,
+        full_name: fullName,
+        charity_name: selectedCharity,
+        contribution_percentage: charityPercent,
+        subscription_status: 'inactive'
+      }]);
+
+      if (profileError) {
+        setError(profileError.message);
+        setLoading(false);
+        return;
+      }
+    }
+
+    router.push('/dashboard');
+  };
 
   const handleProceedToCheckout = () => {
     setError('');
@@ -69,7 +119,7 @@ export default function Register() {
           <div className={regStyles.progress}>
             <div className={`${regStyles.progressStep} ${step >= 1 ? regStyles.progressActive : ''}`}>
               <div className={regStyles.progressDot}>1</div>
-              <span>Account</span>
+              <span>{existingUser ? 'Account details valid' : 'Account'}</span>
             </div>
             <div className={regStyles.progressLine} />
             <div className={`${regStyles.progressStep} ${step >= 2 ? regStyles.progressActive : ''}`}>
@@ -116,9 +166,14 @@ export default function Register() {
                   <label className={styles.label}>Password</label>
                   <input type="password" placeholder="Min 6 characters" className="input" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
                 </div>
-                <button type="submit" className="btn btn-dark" style={{ width: '100%', justifyContent: 'center' }}>
-                  Continue to Charity Selection →
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+                  <button type="submit" className="btn btn-dark" style={{ width: '100%', justifyContent: 'center' }}>
+                    Continue to Subscription →
+                  </button>
+                  <button type="button" className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }} onClick={handleFreeAccount} disabled={loading}>
+                    {loading ? 'Creating...' : 'Create Free Account (Skip Subscription)'}
+                  </button>
+                </div>
               </form>
             </div>
           )}
@@ -158,7 +213,9 @@ export default function Register() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                  <button type="button" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setStep(1)}>← Back</button>
+                  {!existingUser && (
+                    <button type="button" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setStep(1)}>← Back</button>
+                  )}
                   <button type="submit" className="btn btn-dark" style={{ flex: 2, justifyContent: 'center' }}>Continue to Payment →</button>
                 </div>
               </form>

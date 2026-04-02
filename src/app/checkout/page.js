@@ -31,39 +31,60 @@ export default function Checkout() {
       // Simulate Stripe processing delay
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Attempt the actual registration now
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: regData.email,
-        password: regData.password,
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      let userId = null;
+      let newlyCreated = false;
 
-      if (authError) throw authError;
-
-      // Create profile
-      if (authData?.user) {
-        const { error: profileError } = await supabase
+      if (session?.user) {
+        userId = session.user.id;
+        const { error: updateError } = await supabase
           .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              full_name: regData.fullName,
-              charity_name: regData.selectedCharity,
-              contribution_percentage: parseInt(regData.charityPercent, 10),
-              subscription_status: 'active'
-            }
-          ]);
+          .update({
+            charity_name: regData.selectedCharity,
+            contribution_percentage: parseInt(regData.charityPercent, 10),
+            subscription_status: 'active'
+          })
+          .eq('id', userId);
         
-        if (profileError) throw profileError;
+        if (updateError) throw updateError;
+      } else {
+        // Attempt the actual registration now
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: regData.email,
+          password: regData.password,
+        });
+
+        if (authError) throw authError;
+
+        // Create profile
+        if (authData?.user) {
+          newlyCreated = true;
+          userId = authData.user.id;
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: userId,
+                full_name: regData.fullName,
+                charity_name: regData.selectedCharity,
+                contribution_percentage: parseInt(regData.charityPercent, 10),
+                subscription_status: 'active'
+              }
+            ]);
+          
+          if (profileError) throw profileError;
+        }
+
+        if (!authData.session) {
+          router.push('/login?msg=verify');
+          return;
+        }
       }
 
       // Success logic
       sessionStorage.removeItem('pendingRegistration');
       
-      if (!authData.session) {
-        router.push('/login?msg=verify');
-      } else {
-        router.push('/?status=success');
-      }
+      router.push('/dashboard');
 
     } catch (err) {
       setError(err.message);
