@@ -62,7 +62,7 @@ export default function Checkout() {
           userId = authData.user.id;
           const { error: profileError } = await supabase
             .from('profiles')
-            .insert([
+            .upsert([
               {
                 id: userId,
                 full_name: regData.fullName,
