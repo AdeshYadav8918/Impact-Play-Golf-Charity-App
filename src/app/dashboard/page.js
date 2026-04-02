@@ -53,6 +53,11 @@ export default function Dashboard() {
 
   const handleAddScore = async (e) => {
     e.preventDefault();
+    if (profile.subscription_status === 'inactive') {
+      alert("This premium feature is locked. Please upgrade your account to access it.");
+      router.push('/register');
+      return;
+    }
     if (!session) return;
     
     const val = parseInt(newScore);
@@ -90,6 +95,12 @@ export default function Dashboard() {
   };
 
   const handleUploadProof = async (e) => {
+    if (profile.subscription_status === 'inactive') {
+      e.target.value = ''; // clear input
+      alert("This premium feature is locked. Please upgrade your account to access it.");
+      router.push('/register');
+      return;
+    }
     const file = e.target.files[0];
     if (!file) return;
 
@@ -113,31 +124,6 @@ export default function Dashboard() {
 
         <div className={styles.grid} style={{ position: 'relative' }}>
           
-          {profile.subscription_status === 'inactive' && (
-            <div style={{
-              position: 'absolute',
-              top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(255, 255, 255, 0.85)',
-              backdropFilter: 'blur(5px)',
-              zIndex: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              padding: '2rem',
-              borderRadius: 'var(--radius-lg)'
-            }}>
-              <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--text-dark)' }}>Premium Features Locked</h2>
-              <p style={{ maxWidth: '450px', marginBottom: '2rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-                You currently have a free account. To unlock the dashboard, log your scores, track winnings, and participate in our monthly charity draws, you need an active subscription.
-              </p>
-              <Link href="/register" className="btn btn-dark" style={{ padding: '0.85rem 2rem', fontSize: '1.1rem' }}>
-                Upgrade Account
-              </Link>
-            </div>
-          )}
-
           {/* ===== LEFT: Scores ===== */}
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
@@ -224,7 +210,16 @@ export default function Dashboard() {
                   <span className={styles.infoValue} style={{color: 'var(--accent-green)'}}>$42.50</span>
                 </div>
               </div>
-              <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
+              <button 
+                className="btn btn-outline" 
+                style={{ width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+                onClick={(e) => {
+                  if (profile.subscription_status === 'inactive') {
+                    alert("This premium feature is locked. Please upgrade your account to access it.");
+                    router.push('/register');
+                  }
+                }}
+              >
                 Change Charity Settings
               </button>
             </div>
