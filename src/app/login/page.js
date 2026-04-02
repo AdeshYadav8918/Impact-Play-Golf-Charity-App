@@ -98,7 +98,7 @@ export default function Login() {
 
 
           <p className={styles.authSwitch}>
-            Don&apos;t have an account? <Link href="/register" className={styles.authLink}>Subscribe here</Link>
+            Don&apos;t have an account? <Link href="/register" className={styles.authLink}>Create Account</Link>
           </p>
         </div>
       </div>
