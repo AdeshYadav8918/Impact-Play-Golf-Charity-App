@@ -138,7 +138,7 @@ export default function Home() {
                 {profile?.subscription_status === 'admin' ? (
                   <Link href="/admin" className="btn btn-dark btn-lg">Access Admin Console →</Link>
                 ) : (
-                  <Link href="/dashboard" className="btn btn-dark btn-lg">Go to My Dashboard →</Link>
+                  <Link href="/dashboard" className="btn btn-dark btn-lg">Dashboard →</Link>
                 )}
               </>
             ) : (

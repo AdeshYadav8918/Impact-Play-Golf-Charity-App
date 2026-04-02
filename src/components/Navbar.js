@@ -66,7 +66,7 @@ export default function Navbar() {
               {profile?.subscription_status === 'admin' ? (
                 <Link href="/admin" className="btn btn-outline" style={{ border: '1.5px solid var(--accent-gold)', color: 'var(--accent-gold)' }}>Admin Console</Link>
               ) : (
-                <Link href="/dashboard" className="btn btn-green">Go to Dashboard</Link>
+                <Link href="/dashboard" className="btn btn-green">Dashboard</Link>
               )}
               <button onClick={handleLogout} className="btn btn-dark">Logout</button>
             </>
