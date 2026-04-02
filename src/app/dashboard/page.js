@@ -14,6 +14,20 @@ export default function Dashboard() {
   const [newDate, setNewDate] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Load from cache on mount
+  useEffect(() => {
+    const cachedScore = localStorage.getItem('draftScore');
+    const cachedDate = localStorage.getItem('draftDate');
+    if (cachedScore) setNewScore(cachedScore);
+    if (cachedDate) setNewDate(cachedDate);
+  }, []);
+
+  // Save to cache on change
+  useEffect(() => {
+    localStorage.setItem('draftScore', newScore);
+    localStorage.setItem('draftDate', newDate);
+  }, [newScore, newDate]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -90,6 +104,9 @@ export default function Dashboard() {
     } else {
       setNewScore('');
       setNewDate('');
+      // Clear cache on success
+      localStorage.removeItem('draftScore');
+      localStorage.removeItem('draftDate');
       fetchScores(session.user.id); // Refresh grid
     }
   };
