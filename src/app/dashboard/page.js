@@ -148,7 +148,13 @@ export default function Dashboard() {
               <span className={styles.panelMeta}>Stableford Format · Max 5 Scores</span>
             </div>
             <p className={styles.panelDesc}>
-              Enter your most recent round. Oldest score is automatically replaced when you exceed 5.
+              {scores.length < 5 ? (
+                <span style={{ color: '#eab308', fontWeight: 600 }}>
+                  ⚠️ You must enter {5 - scores.length} more score{5 - scores.length === 1 ? '' : 's'} to qualify for the Monthly Draw.
+                </span>
+              ) : (
+                "Enter your most recent round. Oldest score is automatically replaced when you exceed 5."
+              )}
             </p>
 
             <form className={styles.scoreForm} onSubmit={handleAddScore}>

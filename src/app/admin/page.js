@@ -45,9 +45,16 @@ export default function AdminDashboard() {
 
     const { data: allScores } = await supabase.from('scores').select('user_id, score');
     
+    // Valid users must have exactly 5 scores
+    const userScoreCounts = {};
+    allScores?.forEach(s => {
+      userScoreCounts[s.user_id] = (userScoreCounts[s.user_id] || 0) + 1;
+    });
+    const validUserIds = Object.keys(userScoreCounts).filter(uid => userScoreCounts[uid] === 5);
+
     const userMatches = {};
     allScores?.forEach(s => {
-      if (winningNums.includes(s.score)) {
+      if (validUserIds.includes(s.user_id) && winningNums.includes(s.score)) {
         userMatches[s.user_id] = (userMatches[s.user_id] || 0) + 1;
       }
     });
